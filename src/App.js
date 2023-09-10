@@ -9,16 +9,17 @@ const apiUrl = "https://opentdb.com/api.php?amount=10";
 export default function App() {
 
   const [flashcards, setFlashcards] = useState(SAMPLE_FLASHCARDS);
+  
   useEffect(() => {
     axios
     .get(apiUrl)
     .then(res => {
       setFlashcards(
         res.data.results.map((question, questionIndex) => {
-          const options = [...question.incorrect_answers, question.correct_answer]
+          const options = [...question.incorrect_answers.map(answer => decodeSting(answer)), decodeSting(question.correct_answer)]
           return {
-            id: questionIndex,
-            question: question.question,
+            id: `${questionIndex}-${Date.now()}`,
+            question: decodeSting(question.question),
             options: options.sort(() => Math.random() - 0.5),
             answer: question.correct_answer,
           }
@@ -28,16 +29,23 @@ export default function App() {
     
   }, [])
 
-  console.log(flashcards);
-
-
 
   return (
-    <div className='App'>
-      <FlashcardList flashcards={flashcards}/>
+    <div className='App'> 
+      <div className='containers'>
+        <FlashcardList flashcards={flashcards}/>
+      </div>
     </div>
   );
 }
+
+// Remove HTML code in strings
+function decodeSting(str) {
+  const textArea = document.createElement('textarea');
+  textArea.innerHTML = str;
+  return textArea.value;
+}
+
 
 const SAMPLE_FLASHCARDS = [
   {
