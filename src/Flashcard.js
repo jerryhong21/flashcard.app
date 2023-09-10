@@ -10,7 +10,7 @@ const optionIndexes = ['A', 'B', 'C', 'D'];
 export default function Flashcard({ flashcard }) {
 
   const [flip, setFlip] = useState(false);
-  const [height, setHeight] = useState();
+  const [height, setHeight] = useState(0);
 
   const frontElement = useRef();
   const backElement = useRef();
@@ -19,11 +19,16 @@ export default function Flashcard({ flashcard }) {
     const frontHeight = frontElement.current.getBoundingClientRect().height
     const backHeight = backElement.current.getBoundingClientRect().height
     setHeight(Math.max(frontHeight, backHeight, 100));
-
   }
 
+  // takes effect everytime any element in the front and back changes
   useEffect(() => {
+    setMaxHeight();
+  }, [flashcard.question, flashcard.options, flashcard.answer])
 
+  useEffect(() => {
+    window.addEventListener('resize', setMaxHeight);
+    return () => window.removeEventListener('resize', setMaxHeight);
   }, [])
 
 
@@ -31,6 +36,7 @@ export default function Flashcard({ flashcard }) {
     <div
       className={`card ${flip ? 'flip' : ''}`}
       onClick={() => setFlip(!flip)}
+      style={{ height: height }}
     >
       <div ref={frontElement} className='front'>
         {flashcard.question}
@@ -43,6 +49,6 @@ export default function Flashcard({ flashcard }) {
       <div className='back' ref={backElement}>
         {`${optionIndexes[flashcard.options.findIndex((option) => option === flashcard.answer)]}: ${flashcard.answer}`}
       </div>
-    </div>
+    </div >
   )
 }
